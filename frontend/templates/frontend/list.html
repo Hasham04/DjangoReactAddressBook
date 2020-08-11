@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Address Book</title>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+	<link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+	<style type="text/css">
+		body{
+		background: rgb(34,193,195);
+		background: linear-gradient(0deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%);
+		background-size: 100% 200%; 
+		}
+
+		h1, h2, h3, h4, h5, p, span, strike{
+		  font-family: 'Itim', cursive;
+
+		}
+
+		#address-container{
+		  max-width:600px;
+		  margin:0 auto;
+		  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+		  background-color: #fff;
+		  
+		  margin-top:50px;
+		  margin-bottom:50px;
+
+		  justify-content: space-around;
+		  align-items: flex-start;
+
+		}
+
+		#form-wrapper{
+		  position: -webkit-sticky;
+		  position: sticky;
+		  top: 0rem;
+		  border-bottom: 1px solid  #e9e9e9;
+		  background-color: #fff;
+		  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+ 		  padding:40px;
+		}
+
+		#submit{
+		  background-color: #36d9b6;
+		  border:0;
+		  color: #fff;
+		}
+
+		.flex-wrapper{
+			display: flex;
+		}
+
+		.address-wrapper{
+		  	margin:5px;
+		  	padding: 5px;
+		  	padding:20px;
+		  	cursor: pointer;
+		  	border-bottom: 1px solid  #e9e9e9;
+		  	color: black;
+			}
+
+	    .searchbar{
+	    margin-bottom: auto;
+	    margin-top: auto;
+	    height: 60px;
+	    background-color: #353b48;
+	    border-radius: 30px;
+	    padding: 10px;
+	    }
+
+	    .search_input{
+	    color: white;
+	    border: 0;
+	    outline: 0;
+	    background: none;
+	    width: 0;
+	    caret-color:transparent;
+	    line-height: 40px;
+	    transition: width 0.4s linear;
+	    }
+
+	    .searchbar:hover > .search_input{
+	    padding: 0 10px;
+	    width: 450px;
+	    caret-color:red;
+	    transition: width 0.4s linear;
+	    }
+
+	    .searchbar:hover > .search_icon{
+	    background: white;
+	    color: #e74c3c;
+	    }
+
+	    .search_icon{
+	    height: 40px;
+	    width: 40px;
+	    float: right;
+	    display: flex;
+	    justify-content: center;
+	    align-items: center;
+	    border-radius: 50%;
+	    color:white;
+	    text-decoration:none;
+	    }
+		.card {
+		  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+		  transition: 0.3s;
+		  width: 40%;
+		}
+
+		.card:hover {
+		  box-shadow: 0 16px 16px 0 rgba(0,0,0,0.5);
+		}
+
+		.switch {
+			  position: relative;
+			  display: inline-block;
+			  width: 60px;
+			  height: 34px;
+			}
+
+			.switch input { 
+			  opacity: 0;
+			  width: 0;
+			  height: 0;
+			}
+
+			.slider {
+			  position: absolute;
+			  cursor: pointer;
+			  top: 0;
+			  left: 0;
+			  right: 0;
+			  bottom: 0;
+			  background-color: #ccc;
+			  -webkit-transition: .4s;
+			  transition: .4s;
+			}
+
+			.slider:before {
+			  position: absolute;
+			  content: "";
+			  height: 26px;
+			  width: 26px;
+			  left: 4px;
+			  bottom: 4px;
+			  background-color: white;
+			  -webkit-transition: .4s;
+			  transition: .4s;
+			}
+
+			input:checked + .slider {
+			  background-color: #2196F3;
+			}
+
+			input:focus + .slider {
+			  box-shadow: 0 0 1px #2196F3;
+			}
+
+			input:checked + .slider:before {
+			  -webkit-transform: translateX(26px);
+			  -ms-transform: translateX(26px);
+			  transform: translateX(26px);
+			}
+
+			/* Rounded sliders */
+			.slider.round {
+			  border-radius: 34px;
+			}
+
+			.slider.round:before {
+			  border-radius: 50%;
+			}
+	</style>
+</head>
+<body>
+	<h1 style="text-align: center; margin-top:20px;"><i class="fa fa-address-card" aria-hidden="true"></i> 
+		{% if user.is_authenticated %} 
+				 {{request.user}}'s Address Book 
+				 <a href="{% url 'list' %}" class="btn btn-danger btn-lg" onClick="logout()">Logout</a>
+				 	
+		{% else %}  
+				Address Book 
+				<a class="btn btn-primary btn-lg" href="{% url 'login' %}">Login</a>
+				<a href="{% url 'register' %}" id="submit" class="btn btn-info btn-lg">Register</a>
+		{% endif %}
+	</h1>
+	<div class="container">
+		<div id="address-container">
+			<div id="form-wrapper" style= "border: 2px double black;">
+				<form id="form" class="needs-validation" validate>
+					<div class="flex-wrapper">
+						<div style="flex: 6">
+							
+							<input id="user" type="hidden" name="user" value="{{request.user.id}}">
+							<label for="name"><i class="fa fa-user" aria-hidden="true"></i> Name</label>
+							<input id="name" class="form-control" type="text" name="name" placeholder="Add Name" required>
+							<label for="address"><i class="fa fa-location-arrow" aria-hidden="true"></i>Address</label>
+							<input id="address" class="form-control" type="text" name="address" placeholder="Add address" required>
+							<label for="phone"><i class="fa fa-phone" aria-hidden="true"></i> Phone</label>
+							<input id="phone" class="form-control" type="text" name="phone" placeholder="Add Phone #" required>
+							<label for="email"><i class="fa fa-envelope" aria-hidden="true"></i> Email</label>
+							<input id="email" class="form-control" type="text" name="email" placeholder="Email Address" required>
+							&nbsp;
+						    <h5>Mark Favorite</h5>
+						    <label class="switch" style="margin-left: 10px;">
+						  		<input id="favorite" class="form-check-input" type="checkbox" name="favorite">
+						  		<span class="slider round"></span>
+							</label>			
+							&nbsp;
+  							
+  							<input  style="margin-left: 140px; border-radius: 25px;" id="submit" class="btn btn-outline-info submit" type="submit">
+							
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="d-flex justify-content-center h-100">
+        <div class="searchbar">
+          <input class="search_input" id="myInput" type="text" onkeyup="myFunction()" placeholder="Search...">
+          <a href="#" class="search_icon"><i class="fas fa-search"></i></a>
+        </div>
+    </div>
+    <h5 style="margin-left: 50px">Favorites<label style="margin-left: 10px;" class="switch" >
+  		<input type="checkbox" id="one" onclick="myFunction1()">
+  		<span class="slider round"></span>
+	</label></h5>
+
+	<div id="list-wrapper" class="row">
+
+	</div>
+			
+	</div>	
+
+	<script>
+	// Example starter JavaScript for disabling form submissions if there are invalid fields
+	(function() {
+	  'use strict';
+	  window.addEventListener('load', function() {
+	    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+	    var forms = document.getElementsByClassName('needs-validation');
+	    // Loop over them and prevent submission
+	    var validation = Array.prototype.filter.call(forms, function(form) {
+	      form.addEventListener('submit', function(event) {
+	        if (form.checkValidity() === false) {
+	          event.preventDefault();
+	          event.stopPropagation();
+	        }
+	        form.classList.add('was-validated');
+	      }, false);
+	    });
+	  }, false);
+	})();
+	</script>
+
+	<script type="text/javascript">
+
+		function getCookie(name) {
+		    var cookieValue = null;
+		    if (document.cookie && document.cookie !== '') {
+		        var cookies = document.cookie.split(';');
+		        for (var i = 0; i < cookies.length; i++) {
+		            var cookie = cookies[i].trim();
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            }
+		        }
+		    }
+		    return cookieValue;
+		}
+		var csrftoken = getCookie('csrftoken');
+		var headers={'Content-Type':'application/json','X-CSRFToken': csrftoken, 'Authorization':'Token' + window.sessionStorage.getItem('token')}
+		var activeItem = null
+		var list_snapshot = []
+		
+		
+
+		{% if user.is_authenticated %}buildList(){% endif %}
+
+		function buildList(){
+			var wrapper = document.getElementById('list-wrapper')
+			//wrapper.innerHTML = ''
+
+
+
+			var url = 'http://localhost:8000/api/address-list/'
+			
+			fetch(url,headers=headers)
+			.then((resp) => resp.json())
+			.then(function(data){
+				console.log('Data:', data)
+
+				var list = data
+				if (data.detail != "Authentication credentials were not provided."){
+					for (var i in list){
+						try{
+							document.getElementById(`data-${i}`).remove()
+						}catch(err){
+
+						}
+
+
+						if (list[i].favorite == true ){
+							var favorite = `<i style="margin-left:100px; color:orange" class="favorite fa fa-star fa-2x" aria-hidden="true"></i>`
+						}else{
+							var favorite=``
+						}
+						var name = `<h5 class="name"><i class="fa fa-user" aria-hidden="true"></i> Name: ${list[i].name}</h5>`
+						var address = `<p class="address"><i class="fa fa-location-arrow" aria-hidden="true"></i>  Address: ${list[i].address}</p>`
+						var phone = `<p class="phone"><i class="fa fa-phone" aria-hidden="true"></i> Phone: ${list[i].phone}</p>`
+						var email = `<p class="email"><i class="fa fa-envelope" aria-hidden="true"></i> Email: ${list[i].email}</p>`
+
+						var item = `
+
+						<div class="col-md-3"
+							<div id="data-${i}">
+									<div class="card bg-light" style="width: 18.5rem; margin:20px; border: 2px double black; border-radius: 25px;">
+										<div class="card-body">
+											<div class="card-title">
+												${name} 
+												<hr>
+											</div>
+											<div class="card-text">
+												${address}
+												<hr>
+												${phone}
+												<hr>
+												${email}
+											</div>
+											<div class="card-link">
+												<button class="btn btn-sm btn-outline-info edit">Edit</button>
+												<button class="btn btn-sm btn-outline-danger delete">Delete</button>
+												${favorite}
+												
+												
+											</div>
+										</div>
+									</div>
+							</div>
+						</div>
+
+						`
+						wrapper.innerHTML += item
+
+						}
+
+				}
+
+
+				if (list_snapshot.length > list.length){
+					for (var i = list.length; i < list_snapshot.length; i++){
+						document.getElementById(`data-${i}`).remove()
+					}
+				}
+
+				list_snapshot = list
+
+
+				for (var i in list){
+					var editBtn = document.getElementsByClassName('edit')[i]
+					var deleteBtn = document.getElementsByClassName('delete')[i]
+					var user = document.getElementsByClassName('user')[i]
+					var name = document.getElementsByClassName('name')[i]
+					var address = document.getElementsByClassName('address')[i]
+					var phone = document.getElementsByClassName('phone')[i]
+					var email = document.getElementsByClassName('email')[i]
+					var favorite = document.getElementsByClassName('favorite')[i]
+
+
+					if (editBtn){
+					editBtn.addEventListener('click', (function(item){
+							return function(){
+								editItem(item)
+							}
+						})(list[i]))
+					}
+					if (deleteBtn){
+						deleteBtn.addEventListener('click', (function(item){
+							return function(){
+								deleteItem(item)
+							}
+						})(list[i]))
+					}
+				}
+
+			})
+		}
+
+
+		var form = document.getElementById('form-wrapper')
+		form.addEventListener('submit', function(e){
+			e.preventDefault()
+			console.log('Form submitted')
+			
+			var url = 'http://localhost:8000/api/address-create/'
+			if (activeItem != null){
+				var url = `http://localhost:8000/api/address-update/${activeItem.id}/`
+				activeItem = null
+			}
+			var user = document.getElementById('user').value
+			var name = document.getElementById('name').value
+			var address = document.getElementById('address').value
+			var phone = document.getElementById('phone').value
+			var email = document.getElementById('email').value
+			var favorite = document.getElementById('favorite').value
+
+			
+			if (document.getElementById('favorite').checked){
+				favorite=true
+			}else{
+				favorite=false
+			}
+			console.log(document.getElementById('favorite').value)
+			
+			{% if user.is_authenticated %}
+				fetch(url, {
+					method:'POST',
+					headers:headers,
+					body:JSON.stringify({'user':user,'name':name,'address':address,'phone':phone,'email':email,'favorite':favorite})
+				}
+				).then(function(response){
+					buildList()
+					document.getElementById('form').reset()
+				})
+			{% else %}
+				alert('Sign in to add an address')
+				document.getElementById('form').reset()
+			{% endif %}
+
+		})
+
+		function editItem(item){
+			console.log('Item clicked:', item)
+			activeItem = item
+			document.getElementById('user').value = activeItem.user
+			document.getElementById('name').value = activeItem.name
+			document.getElementById('address').value = activeItem.address
+			document.getElementById('phone').value = activeItem.phone
+			document.getElementById('email').value = activeItem.email
+			document.getElementById('favorite').value = activeItem.favorite
+			console.log(document.getElementById('favorite').value)
+		}
+
+
+		function deleteItem(item){
+			console.log('Delete clicked')
+			fetch(`http://localhost:8000/api/address-delete/${item.id}/`, {
+				method:'DELETE', 
+				headers:headers,
+			}).then((response) => {
+				buildList()
+			})
+		}
+
+		function logout(){
+					fetch("http://localhost:8000/api/rest-auth/logout/", {
+                        method: "post",
+                        credentials: "same-origin",
+                        headers: headers,
+					}).then(response => {
+						{}
+					})
+				}
+
+		function myFunction() {
+			  // Declare variables 
+			    let input = document.getElementById('myInput').value 
+			    input=input.toLowerCase(); 
+			    let x = document.getElementsByClassName('card'); 
+			      
+			    for (i = 0; i < x.length; i++) {  
+			        if (!x[i].innerHTML.toLowerCase().includes(input)) { 
+			            x[i].style.display="none"; 
+			        } 
+			        else { 
+			            x[i].style.display="";                  
+			        } 
+			    } 
+			} 
+
+		function myFunction1() {
+			  // Get the checkbox
+			  var checkBox = document.getElementById("one");
+			  let x = document.getElementsByClassName('card')
+			  // Get the output text
+			  
+
+			  // If the checkbox is checked, display the output text
+			  if (checkBox.checked == false ){
+			  	 for (i = 0; i < x.length; i++) {
+			  	 	x[i].style.display="block";
+			  	 }
+			  }
+			  if (checkBox.checked == true ){
+			  	 for (i = 0; i < x.length; i++) {
+			  	 	if (!x[i].innerHTML.includes('fa fa-star')){
+			  	 		x[i].style.display = "none";	
+			  	 	}
+			 	 }
+			  }  
+		}
+			 
+	</script>
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	
+</body>
+</html>
